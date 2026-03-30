@@ -6,7 +6,6 @@ import {DisperseSepoliaScript} from "../script/Disperse.s.sol";
 
 contract DisperseImpactTest is Test {
     DisperseSepoliaScript public script;
-    address constant DISPERSE_ADDR = 0xd15fE25eD0Dba12fE05e7029C88b10C25e8880E3;
     // Default Forge Broadcaster
     address constant DEFAULT_BROADCASTER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
@@ -38,7 +37,8 @@ contract DisperseImpactTest is Test {
         for (uint256 i = 0; i < accesses.length; i++) {
             Vm.AccountAccess memory access = accesses[i];
 
-            bool isDisperse = access.account == DISPERSE_ADDR;
+            address disperseAddr = script.getDisperseAddr();
+            bool isDisperse = access.account == disperseAddr;
             bool isDistributor = access.account == DEFAULT_BROADCASTER;
             bool balanceChanged = access.oldBalance != access.newBalance;
 
@@ -60,5 +60,13 @@ contract DisperseImpactTest is Test {
             }
         }
         console.log("========================================================");
+    }
+
+    function test_ExecutionImpact_Lasna() public {
+        vm.createSelectFork(vm.rpcUrl("lasna"));
+        script = new DisperseSepoliaScript();
+        vm.deal(DEFAULT_BROADCASTER, 100 ether);
+        
+        test_ExecutionImpact();
     }
 }

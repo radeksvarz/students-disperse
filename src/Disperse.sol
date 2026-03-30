@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract Disperse {
+    function disperseEther(address[] calldata recipients, uint256[] calldata values) external payable {
+        for (uint256 i = 0; i < recipients.length; i++) {
+            (bool success, ) = recipients[i].call{value: values[i]}("");
+            require(success, "Transfer failed");
+        }
+        uint256 balance = address(this).balance;
+        if (balance > 0) {
+            (bool success, ) = msg.sender.call{value: balance}("");
+            require(success, "Refund failed");
+        }
+    }
+
+    function disperseToken(address token, address[] calldata recipients, uint256[] calldata values) external {
+        uint256 total = 0;
+        for (uint256 i = 0; i < recipients.length; i++) total += values[i];
+        
+        IERC20(token).transferFrom(msg.sender, address(this), total);
+        for (uint256 i = 0; i < recipients.length; i++) {
+            IERC20(token).transfer(recipients[i], values[i]);
+        }
+    }
+}
+
+interface IERC20 {
+    function transfer(address to, uint256 value) external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}

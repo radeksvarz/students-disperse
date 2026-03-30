@@ -9,8 +9,13 @@ interface IDisperse {
 }
 
 contract DisperseSepoliaScript is Script {
-    address constant DISPERSE = 0xd15fE25eD0Dba12fE05e7029C88b10C25e8880E3;
     uint256 constant AMOUNT_PER_RECIPIENT = 10 ether;
+
+    function getDisperseAddr() public view returns (address) {
+        string memory toml = vm.readFile("disperse.toml");
+        string memory chainIdStr = vm.toString(block.chainid);
+        return vm.parseTomlAddress(toml, string.concat(".", chainIdStr));
+    }
 
     function run() external {
         string memory raw = vm.readFile("students.txt");
@@ -62,10 +67,11 @@ contract DisperseSepoliaScript is Script {
         console.log("unique recipient count", uniqueCount);
         console.log("amount per recipient", AMOUNT_PER_RECIPIENT);
         console.log("total", total);
-        console.logAddress(DISPERSE);
+        address disperse = getDisperseAddr();
+        console.logAddress(disperse);
 
         vm.startBroadcast();
-        IDisperse(DISPERSE).disperseEther{value: total}(recipients, values);
+        IDisperse(disperse).disperseEther{value: total}(recipients, values);
         vm.stopBroadcast();
     }
 }

@@ -7,3 +7,5 @@ fs_permissions = [{ access = "read", path = "./" }]
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 [rpc_endpoints]
 sepolia = "https://ethereum-sepolia-rpc.publicnode.com"
+lasna = "https://lasna-rpc.rnk.dev/"
+
